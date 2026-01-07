@@ -1,0 +1,146 @@
+# ================================================
+# Intelligent Traffic Management System - Config
+# ================================================
+
+paths:
+  # Raw data paths
+  raw_data_dir: "data/raw/"
+  adj_matrix: "data/raw/adj_METR-LA.pkl"
+  metr_la_csv: "data/raw/METR-LA.csv"
+  detrac_dir: "data/raw/DETRAC-UPLOAD/"
+
+  # Processed data paths
+  processed_data_dir: "data/processed/"
+  metr_la_prepared: "data/processed/metr_la_prepared.npy"
+  detrac_prepared: "data/processed/detrac_prepared.npy"
+  scaler_path: "data/processed/scaler.pkl"
+
+  # Model paths
+  models_dir: "models/"
+  yolo_weights: "models/yolov8_weights.pt"
+  traffic_model: "models/traffic_lstm_model.h5"
+
+  # Output paths
+  outputs_dir: "outputs/"
+  detections_dir: "outputs/detections/"
+  density_dir: "outputs/density_graphs/"
+  predictions_dir: "outputs/predictions/"
+  decisions_dir: "outputs/decisions/"
+  videos_dir: "outputs/videos/"
+  reports_dir: "outputs/reports/"
+
+# -------------------------------
+# Vehicle Detection Parameters
+# -------------------------------
+vehicle_detection:
+  model_type: "yolov8n"         # yolov8n, yolov8s, yolov8m, yolov8l, yolov8x
+  weights_path: "models/yolov8_weights.pt"
+  confidence_threshold: 0.4
+  iou_threshold: 0.45
+  target_classes: [2, 3, 5, 7]  # car, motorcycle, bus, truck (COCO)
+  input_size: [640, 640]
+  batch_size: 16
+  device: "cuda"                # cuda or cpu
+  class_names_file: ""           # optional path to class names file
+
+# -------------------------------
+# Density Estimation Parameters
+# -------------------------------
+density_estimation:
+  roi_zones: 4
+  density_threshold_low: 10
+  density_threshold_medium: 25
+  density_threshold_high: 40
+  smoothing_window: 5
+  visualize_density: true
+
+# -------------------------------
+# Traffic Prediction Parameters
+# -------------------------------
+traffic_prediction:
+  model_type: "LSTM"
+  model_path: "models/traffic_lstm_model.h5"
+  input_size: 10               # <-- Add this (number of input features)
+  output_size: 1               # optional, default is 1
+  sequence_length: 12
+  prediction_horizon: 3
+  batch_size: 32
+  epochs: 50
+  learning_rate: 0.001
+  hidden_size: 64
+  num_layers: 2
+  dropout: 0.2
+  bidirectional: true          # optional, default True
+  use_attention: true          # optional, default True
+  train_test_split: 0.8
+
+# -------------------------------
+# Decision Engine Parameters
+# -------------------------------
+
+decision:
+  mode: "hybrid"
+  total_lanes: 4
+  min_lanes_per_direction: 1
+  max_lanes_per_direction: 3
+  thresholds:
+    low_traffic: 0.3       # used in rule-based density classification
+    medium_traffic: 0.6
+    high_traffic: 0.9
+  decision_interval: 300
+  hysteresis: 0.1
+  ai_weight: 0.7
+  lane_configs:
+    lane_1:
+      current_direction: "forward"
+    lane_2:
+      current_direction: "forward"
+    lane_3:
+      current_direction: "backward"
+    lane_4:
+      current_direction: "backward"
+
+decision_engine:
+  model_type: "MLP"            # AI model type
+  model_path: "models/ai_decision_model.pt"
+  input_features: 8             # number of features per time step
+  hidden_layers: [64, 32]
+  output_size: 2                # lane allocation decisions
+  decision_interval: 300
+  ai_weight: 0.7
+  num_lanes: 4
+  congestion_threshold: 0.7
+  hysteresis: 0.1
+  batch_size: 32
+# -------------------------------
+# Visualization Parameters
+# -------------------------------
+visualization:
+  figsize: [12, 8]
+  dpi: 100
+  save_format: "png"
+  color_map: "viridis"
+  show_live_overlay: true
+  font_scale: 0.5
+  font_color: [0, 255, 0]
+  font_shadow: [0, 0, 0]
+
+# -------------------------------
+# System Parameters
+# -------------------------------
+system:
+  random_seed: 42
+  num_workers: 4
+  log_level: "INFO"
+  save_intermediate: true
+  device: "cuda"                 # global fallback
+  max_frames: 0                  # 0 = process all frames
+
+tracking:
+  max_disappeared: 50
+  max_distance: 60
+
+output_dirs:
+  decisions: "outputs/decisions"     # directory to save decision outputs
+  logs: "outputs/logs"               # optional: directory for logs
+  models: "models"                   # optional: model save/load path

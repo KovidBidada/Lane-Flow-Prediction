@@ -1,0 +1,19 @@
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+
+# Data & outputs
+data/
+outputs/
+
+# Model weights
+yolov8*.pt
+
+# Jupyter
+.ipynb_checkpoints/
